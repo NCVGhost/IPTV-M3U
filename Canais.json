@@ -1,56 +1,52 @@
 [
   {
-    "name": "Teste",
-    "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-    "img": "https://i.imgur.com/4BsjUJp.png",
-    "category": "Canais Fechados"
+    "category": "Canais Fechados",
+    "items": [
+      {
+        "name": "Warner HD",
+        "url": "http://dnsul.top:80/live/paquita/pai/7883.m3u8",
+        "img": "https://i.imgur.com/4BsjUJp.png"
+      },
+      {
+        "name": "A&E",
+        "url": "http://dnsul.top:80/live/paquita/pai/8149.m3u8",
+        "img": "https://i.imgur.com/xQ2sG46.png"
+      },
+      {
+        "name": "TNT HD",
+        "url": "http://dnsul.top:80/live/paquita/pai/7906.m3u8",
+        "img": "https://i.imgur.com/qMVtaM9.png"
+      },
+      {
+        "name": "Mega Pix HD",
+        "url": "http://dnsul.top:80/live/paquita/pai/7990.m3u8",
+        "img": "https://i.imgur.com/oDWyzmv.png"
+      },
+      {
+        "name": "Space HD",
+        "url": "http://dnsul.top:80/live/paquita/pai/7936.m3u8",
+        "img": "https://i.imgur.com/kHvaLFZ.png"
+      }
+    ]
   },
   {
-    "name": "Warner HD",
-    "url": "http://dnsul.top:80/live/paquita/pai/7883.m3u8",
-    "img": "https://i.imgur.com/4BsjUJp.png",
-    "category": "Canais Fechados"
-  },
-  {
-    "name": "A&E",
-    "url": "http://dnsul.top:80/live/paquita/pai/8149.m3u8",
-    "img": "https://i.imgur.com/xQ2sG46.png",
-    "category": "Canais Fechados"
-  },
-  {
-    "name": "TNT HD",
-    "url": "http://dnsul.top:80/live/paquita/pai/7906.m3u8",
-    "img": "https://i.imgur.com/qMVtaM9.png",
-    "category": "Canais Fechados"
-  },
-  {
-    "name": "Mega Pix HD",
-    "url": "http://dnsul.top:80/live/paquita/pai/7990.m3u8",
-    "img": "https://i.imgur.com/oDWyzmv.png",
-    "category": "Canais Fechados"
-  },
-  {
-    "name": "Space HD",
-    "url": "http://dnsul.top:80/live/paquita/pai/7936.m3u8",
-    "img": "https://i.imgur.com/kHvaLFZ.png",
-    "category": "Canais Fechados"
-  },
-  {
-    "name": "[24h] Scooby Doo",
-    "url": "http://dnsul.top:80/live/paquita/pai/143759.m3u8",
-    "img": "https://i.imgur.com/apvTsI0.jpg",
-    "category": "24H"
-  },
-  {
-    "name": "[24h] Simpsons",
-    "url": "http://dnsul.top:80/live/paquita/pai/143924.m3u8",
-    "img": "https://i.imgur.com/AHmeYJr.jpg",
-    "category": "24H"
-  },
-  {
-    "name": "[24h] The Big Bang Theory",
-    "url": "http://dnsul.top:80/live/paquita/pai/143863.m3u8",
-    "img": "https://i.imgur.com/AHmeYJr.jpg",
-    "category": "24H"
+    "category": "24H",
+    "items": [
+      {
+        "name": "[24h] Scooby Doo",
+        "url": "http://dnsul.top:80/live/paquita/pai/143759.m3u8",
+        "img": "https://i.imgur.com/apvTsI0.jpg"
+      },
+      {
+        "name": "[24h] Simpsons",
+        "url": "http://dnsul.top:80/live/paquita/pai/143924.m3u8",
+        "img": "https://i.imgur.com/AHmeYJr.jpg"
+      },
+      {
+        "name": "[24h] The Big Bang Theory",
+        "url": "http://dnsul.top:80/live/paquita/pai/143863.m3u8",
+        "img": "https://i.imgur.com/AHmeYJr.jpg"
+      }
+    ]
   }
 ]
