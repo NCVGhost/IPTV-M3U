@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MainScene" extends="Scene">
+    
+    <children>
+        <!-- Fundo -->
+        <Rectangle width="1920" height="1080" color="0x0A0A0AFF" />
+        
+        <!-- ========== MENU LATERAL ========== -->
+        <Group id="menuGroup" translation="[0, 0]">
+            <Rectangle width="350" height="1080" color="0x1A1A1AFF" />
+            <Label id="logoLabel" translation="[50, 40]" text="📺 IPTV" font="font:LargeBoldSystemFont" color="0xE67E22FF" />
+            <Label id="menuTitle" translation="[50, 100]" text="CATEGORIAS" font="font:MediumSystemFont" color="0x888888FF" />
+            <Rectangle width="300" height="2" color="0x333333FF" translation="[25, 130]" />
+            
+            <LabelList
+                id="categoriasMenu"
+                translation="[25, 150]"
+                itemSize="[300, 50]"
+                numRows="10"
+                vertFocusAnimationStyle="floatingFocus"
+                focusable="true"
+            />
+        </Group>
+        
+        <!-- ========== ÁREA PRINCIPAL ========== -->
+        <Group id="contentGroup" translation="[370, 0]">
+            <Rectangle width="1550" height="100" color="0x1A1A1AFF" />
+            <Label id="categoriaTitle" translation="[50, 35]" text="Selecione uma categoria" font="font:LargeBoldSystemFont" color="0xFFFFFFFF" />
+            <Label id="canalCountLabel" translation="[450, 45]" text="" font="font:SmallSystemFont" color="0x888888FF" />
+            <Rectangle width="1550" height="2" color="0x333333FF" translation="[0, 100]" />
+            
+            <PosterGrid
+                id="canaisGrid"
+                translation="[50, 120]"
+                itemSize="[280, 220]"
+                numColumns="5"
+                numRows="4"
+                itemSpacing="[30, 30]"
+                itemComponentName="ChannelItem"
+                focusable="true"
+                vertFocusAnimationStyle="floatingFocus"
+            />
+        </Group>
+        
+        <!-- PLAYER -->
+        <Group id="playerGroup" visible="false">
+            <Video id="videoPlayer" translation="[0, 0]" width="1920" height="1080" />
+            <Rectangle id="playerTopBar" width="1920" height="80" color="0x000000CC" translation="[0, 0]" />
+            <Label id="playerTitle" translation="[100, 25]" text="" font="font:MediumSystemFont" color="0xFFFFFFFF" />
+            <Label id="playerHint" translation="[100, 1050]" text="🔙 Voltar para lista" font="font:SmallSystemFont" color="0x888888FF" />
+        </Group>
+        
+        <!-- LOADING -->
+        <Rectangle id="loadingOverlay" width="1920" height="1080" color="0x000000CC" visible="false" />
+        <Label id="loadingLabel" translation="[960, 540]" text="Carregando..." font="font:LargeBoldSystemFont" color="0xFFFFFFFF" horizAlign="center" visible="false" />
+    </children>
+    
+    <script type="text/brightscript">
+        <![CDATA[
+        
+        sub init()
+            print "========================================="
+            print "📺 IPTV App - JSON Simplificado"
+            print "========================================="
+            
+            ' URL do JSON simplificado
+            m.jsonUrl = "https://raw.githubusercontent.com/NCVGhost/IPTV-M3U/refs/heads/main/Canais.json"
+            
+            ' Menu
+            m.categoriasMenu = m.top.findNode("categoriasMenu")
+            
+            ' Conteúdo
+            m.categoriaTitle = m.top.findNode("categoriaTitle")
+            m.canaisGrid = m.top.findNode("canaisGrid")
+            m.canalCountLabel = m.top.findNode("canalCountLabel")
+            
+            ' Player
+            m.playerGroup = m.top.findNode("playerGroup")
+            m.videoPlayer = m.top.findNode("videoPlayer")
+            m.playerTitle = m.top.findNode("playerTitle")
+            
+            ' Loading
+            m.loadingOverlay = m.top.findNode("loadingOverlay")
+            m.loadingLabel = m.top.findNode("loadingLabel")
+            
+            ' Dados
+            m.todosCanais = []      ' Lista completa de canais
+            m.categoriasUnicas = [] ' Lista única de categorias
+            m.canaisPorCategoria = {} ' Dicionário: categoria -> lista de canais
+            
+            m.top.setFocus(true)
+            
+            carregarCanais()
+        end sub
+        
+        ' ===========================================
+        ' CARREGAR JSON
+        ' ===========================================
+        
+        sub carregarCanais()
+            mostrarLoading(true, "Carregando lista de canais...")
+            
+            print "📡 Buscando: " + m.jsonUrl
+            
+            transfer = CreateObject("roUrlTransfer")
+            transfer.SetUrl(m.jsonUrl)
+            
+            resposta = transfer.GetToString()
+            
+            if resposta = "" or resposta = invalid
+                print "❌ Erro ao carregar"
+                mostrarLoading(false, "")
+                return
+            end if
+            
+            dados = ParseJSON(resposta)
+            
+            if dados = invalid or dados.count() = 0
+                print "❌ JSON inválido"
+                mostrarLoading(false, "")
+                return
+            end if
+            
+            print "✅ JSON carregado! Total de canais: " + stri(dados.count())
+            
+            ' Processar dados para organizar por categoria
+            processarDados(dados)
+            
+            ' Criar menu de categorias
+            criarMenuCategorias()
+            
+            ' Carregar primeira categoria
+            if m.categoriasUnicas.count() > 0
+                primeiraCategoria = m.categoriasUnicas[0]
+                print "🔽 Primeira categoria: " + primeiraCategoria
+                carregarCategoria(primeiraCategoria)
+            end if
+            
+            mostrarLoading(false, "")
+        end sub
+        
+        ' ===========================================
+        ' PROCESSAR DADOS (agrupar por categoria)
+        ' ===========================================
+        
+        sub processarDados(dados as object)
+            ' Criar dicionário para agrupar
+            categoriasTemp = {}
+            
+            for each canal in dados
+                categoria = canal.category
+                nomeCanal = canal.name
+                urlCanal = canal.url
+                imgCanal = canal.img
+                
+                print "Processando: " + nomeCanal + " -> " + categoria
+                
+                ' Se categoria não existe, criar lista
+                if categoriasTemp.DoesExist(categoria) = false
+                    categoriasTemp[categoria] = []
+                end if
+                
+                ' Adicionar canal à lista da categoria
+                lista = categoriasTemp[categoria]
+                lista.Push({
+                    name: nomeCanal,
+                    url: urlCanal,
+                    img: imgCanal,
+                    category: categoria
+                })
+            end for
+            
+            ' Converter para arrays do BrightScript
+            m.categoriasUnicas = []
+            for each cat in categoriasTemp.Keys()
+                m.categoriasUnicas.Push(cat)
+            end for
+            
+            ' Ordenar categorias
+            m.categoriasUnicas.Sort()
+            
+            ' Criar mapa de canais por categoria
+            m.canaisPorCategoria = {}
+            for each cat in m.categoriasUnicas
+                m.canaisPorCategoria[cat] = categoriasTemp[cat]
+            end for
+            
+            ' Mostrar resumo
+            print "========================================="
+            print "📊 RESULTADO DO PROCESSAMENTO:"
+            print "   Categorias encontradas: " + stri(m.categoriasUnicas.count())
+            for each cat in m.categoriasUnicas
+                total = m.canaisPorCategoria[cat].count()
+                print "   - " + cat + ": " + stri(total) + " canais"
+            end for
+            print "========================================="
+        end sub
+        
+        ' ===========================================
+        ' CRIAR MENU DE CATEGORIAS
+        ' ===========================================
+        
+        sub criarMenuCategorias()
+            print "📁 Criando menu de categorias..."
+            
+            root = CreateObject("roSGNode", "ContentNode")
+            
+            for each cat in m.categoriasUnicas
+                item = root.CreateChild("ContentNode")
+                item.title = cat
+                print "   + Menu: " + cat
+            end for
+            
+            m.categoriasMenu.content = root
+            m.categoriasMenu.observeField("itemSelected", "onCategoriaMenuSelecionada")
+            m.categoriasMenu.setFocus(true)
+            
+            print "✅ Menu criado com " + stri(root.getChildCount()) + " categorias"
+        end sub
+        
+        ' ===========================================
+        ' SELECIONAR CATEGORIA NO MENU
+        ' ===========================================
+        
+        sub onCategoriaMenuSelecionada()
+            idx = m.categoriasMenu.itemSelected
+            if idx = invalid then return
+            
+            if idx >= m.categoriasUnicas.count() then return
+            
+            categoria = m.categoriasUnicas[idx]
+            print "🖱️ Menu: Categoria selecionada: " + categoria
+            
+            carregarCategoria(categoria)
+        end sub
+        
+        ' ===========================================
+        ' CARREGAR CANAIS DE UMA CATEGORIA
+        ' ===========================================
+        
+        sub carregarCategoria(categoria as string)
+            print "📂 Carregando categoria: " + categoria
+            
+            canais = m.canaisPorCategoria[categoria]
+            
+            if canais = invalid or canais.count() = 0
+                print "❌ Nenhum canal encontrado para " + categoria
+                m.categoriaTitle.text = categoria
+                m.canalCountLabel.text = "0 canais"
+                return
+            end if
+            
+            print "📺 Total de canais: " + stri(canais.count())
+            
+            ' Atualizar título
+            m.categoriaTitle.text = categoria
+            m.canalCountLabel.text = stri(canais.count()) + " canais"
+            
+            ' Criar conteúdo para o PosterGrid
+            root = CreateObject("roSGNode", "ContentNode")
+            
+            for each canal in canais
+                node = root.CreateChild("ContentNode")
+                node.title = canal.name
+                node.url = canal.url
+                node.HDPosterUrl = canal.img
+                node.streamFormat = "hls"
+                print "   + " + canal.name
+                print "     URL: " + canal.url
+            end for
+            
+            m.canaisGrid.content = root
+            m.canaisGrid.observeField("itemSelected", "onCanalSelecionado")
+            
+            print "✅ " + stri(root.getChildCount()) + " canais carregados na grade"
+            
+            ' Dar foco para a grade
+            m.canaisGrid.setFocus(true)
+        end sub
+        
+        ' ===========================================
+        ' SELECIONAR CANAL
+        ' ===========================================
+        
+        sub onCanalSelecionado()
+            idx = m.canaisGrid.itemSelected
+            if idx = invalid then return
+            
+            root = m.canaisGrid.content
+            if root = invalid then return
+            
+            if idx >= root.getChildCount() then return
+            
+            canal = root.GetChild(idx)
+            if canal = invalid then return
+            
+            print "▶️ Reproduzindo: " + canal.title
+            print "   URL: " + canal.url
+            
+            iniciarPlayer(canal)
+        end sub
+        
+        ' ===========================================
+        ' PLAYER
+        ' ===========================================
+        
+        sub iniciarPlayer(canal as object)
+            mostrarLoading(true, "Carregando " + canal.title + "...")
+            
+            ' Esconder menu e conteúdo
+            m.categoriasMenu.visible = false
+            m.canaisGrid.visible = false
+            m.categoriaTitle.visible = false
+            m.canalCountLabel.visible = false
+            
+            ' Mostrar player
+            m.playerGroup.visible = true
+            m.videoPlayer.visible = true
+            m.playerTitle.text = "▶️ " + canal.title
+            
+            content = CreateObject("roSGNode", "ContentNode")
+            content.url = canal.url
+            content.streamFormat = "hls"
+            content.title = canal.title
+            
+            m.videoPlayer.content = content
+            m.videoPlayer.control = "play"
+            m.videoPlayer.setFocus(true)
+            m.videoPlayer.observeField("state", "onVideoState")
+            
+            mostrarLoading(false, "")
+        end sub
+        
+        sub onVideoState()
+            state = m.videoPlayer.state
+            print "🎬 Estado: " + state
+            
+            if state = "error"
+                print "❌ Erro na reprodução"
+                mostrarLoading(true, "Erro ao reproduzir")
+                
+                timer = CreateObject("roTimer")
+                timer.duration = 2
+                timer.repeat = false
+                timer.start()
+                while timer.isRunning
+                end while
+                
+                mostrarLoading(false, "")
+                fecharPlayer()
+            else if state = "finished"
+                print "🏁 Vídeo finalizado"
+                fecharPlayer()
+            end if
+        end sub
+        
+        sub fecharPlayer()
+            print "🔙 Fechando player"
+            
+            m.videoPlayer.control = "stop"
+            m.videoPlayer.unobserveField("state")
+            
+            m.playerGroup.visible = false
+            
+            ' Mostrar menu e conteúdo
+            m.categoriasMenu.visible = true
+            m.canaisGrid.visible = true
+            m.categoriaTitle.visible = true
+            m.canalCountLabel.visible = true
+            
+            m.canaisGrid.setFocus(true)
+        end sub
+        
+        ' ===========================================
+        ' UTILITÁRIOS
+        ' ===========================================
+        
+        sub mostrarLoading(mostrar, msg)
+            m.loadingOverlay.visible = mostrar
+            m.loadingLabel.visible = mostrar
+            if mostrar and msg <> ""
+                m.loadingLabel.text = msg
+            end if
+        end sub
+        
+        function onKeyEvent(key as string, press as boolean) as boolean
+            if not press then return false
+            
+            if m.playerGroup.visible = true
+                if key = "back"
+                    fecharPlayer()
+                    return true
+                end if
+                return true
+            end if
+            
+            if key = "right"
+                if m.categoriasMenu.hasFocus()
+                    m.canaisGrid.setFocus(true)
+                    return true
+                end if
+            else if key = "left"
+                if m.canaisGrid.hasFocus()
+                    m.categoriasMenu.setFocus(true)
+                    return true
+                end if
+            else if key = "back"
+                print "🔚 Fechando app"
+                return false
+            end if
+            
+            return false
+        end function
+        ]]>
+    </script>
+    
+</component>
