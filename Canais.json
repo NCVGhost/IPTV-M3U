@@ -1,5 +1,11 @@
 [
   {
+    "name": "Teste",
+    "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    "img": "https://i.imgur.com/4BsjUJp.png",
+    "category": "Canais Fechados"
+  }
+  {
     "name": "Warner HD",
     "url": "http://dnsul.top:80/live/paquita/pai/7883.m3u8",
     "img": "https://i.imgur.com/4BsjUJp.png",
