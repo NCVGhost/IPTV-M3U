@@ -1,24 +1,18 @@
 [
   {
-    "name": "Warner HD",
-    "url": "http://dnsul.top:80/live/paquita/pai/7883.m3u8",
+    "name": "Teste MP4",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     "img": "https://i.imgur.com/4BsjUJp.png",
     "category": "Canais Fechados"
-  },
+  }  
   {
-    "name": "Teste",
+    "name": "Warner HD",
     "url": "http://dnsul.top:80/live/paquita/pai/7883.m3u8",
     "img": "https://i.imgur.com/4BsjUJp.png",
     "category": "Canais Fechados"
   },  
   {
     "name": "A&E",
-    "url": "http://dnsul.top:80/live/paquita/pai/8149.m3u8",
-    "img": "https://i.imgur.com/xQ2sG46.png",
-    "category": "Canais Fechados"
-  },
-  {
-    "name": "novo Teste",
     "url": "http://dnsul.top:80/live/paquita/pai/8149.m3u8",
     "img": "https://i.imgur.com/xQ2sG46.png",
     "category": "Canais Fechados"
